@@ -1,18 +1,14 @@
 package mod.chiselsandbits.api;
 
-import net.minecraftforge.items.IItemHandler;
+public interface IBitBag {
 
-public interface IBitBag extends IItemHandler
-{
+    /**
+     * @return get max stack size of bits inside the bag.
+     */
+    int getBitbagStackSize();
 
-	/**
-	 * @return get max stack size of bits inside the bag.
-	 */
-	int getBitbagStackSize();
-
-	/**
-	 * @return how many slots contain bits.
-	 */
-	int getSlotsUsed();
-
+    /**
+     * @return how many slots contain bits.
+     */
+    int getSlotsUsed();
 }

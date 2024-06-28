@@ -4,63 +4,53 @@ package mod.chiselsandbits.api;
  * use these Enums to retrieve various settings or runtime values via
  * {@link IChiselAndBitsAPI}.getParameter
  */
-public interface ParameterType<T extends Object>
-{
+public interface ParameterType<T extends Object> {
 
-	public ParamTypes getType();
+    ParamTypes getType();
 
-	public static enum ParamTypes
-	{
-		BOOLEAN,
-		FLOAT,
-		DOUBLE,
-		INTEGER
-	};
+    enum ParamTypes {
+        BOOLEAN,
+        FLOAT,
+        DOUBLE,
+        INTEGER
+    };
 
-	public static enum BooleanParam implements ParameterType<Boolean>
-	{
-		ENABLE_MCMP(/* enableMCMultipart */),
-		ENABLE_DAMAGE_TOOLS(/* damageTools */),
-		ENABLE_BIT_LIGHT_SOURCE(/* enableBitLightSource */);
+    enum BooleanParam implements ParameterType<Boolean> {
+        ENABLE_DAMAGE_TOOLS(
+        /* damageTools */ ),
+        ENABLE_BIT_LIGHT_SOURCE(
+        /* enableBitLightSource */ );
 
-		@Override
-		public ParamTypes getType()
-		{
-			return ParamTypes.BOOLEAN;
-		}
-	};
+        @Override
+        public ParamTypes getType() {
+            return ParamTypes.BOOLEAN;
+        }
+    };
 
-	public static enum FloatParam implements ParameterType<Float>
-	{
-		BLOCK_FULL_LIGHT_PERCENTAGE(/* bitLightPercentage */);
+    enum FloatParam implements ParameterType<Float> {
+        BLOCK_FULL_LIGHT_PERCENTAGE(/* bitLightPercentage */ );
 
-		@Override
-		public ParamTypes getType()
-		{
-			return ParamTypes.FLOAT;
-		}
-	}
+        @Override
+        public ParamTypes getType() {
+            return ParamTypes.FLOAT;
+        }
+    }
 
-	public static enum DoubleParam implements ParameterType<Double>
-	{
-		BIT_MAX_DRAWN_REGION_SIZE(/* maxDrawnRegionSize */);
+    enum DoubleParam implements ParameterType<Double> {
+        BIT_MAX_DRAWN_REGION_SIZE(/* maxDrawnRegionSize */ );
 
-		@Override
-		public ParamTypes getType()
-		{
-			return ParamTypes.DOUBLE;
-		}
-	}
+        @Override
+        public ParamTypes getType() {
+            return ParamTypes.DOUBLE;
+        }
+    }
 
-	public static enum IntegerParam implements ParameterType<Integer>
-	{
-		BIT_BAG_MAX_STACK_SIZE(/* bagStackSize */);
+    enum IntegerParam implements ParameterType<Integer> {
+        BIT_BAG_MAX_STACK_SIZE(/* bagStackSize */ );
 
-		@Override
-		public ParamTypes getType()
-		{
-			return ParamTypes.INTEGER;
-		}
-	}
-
+        @Override
+        public ParamTypes getType() {
+            return ParamTypes.INTEGER;
+        }
+    }
 }

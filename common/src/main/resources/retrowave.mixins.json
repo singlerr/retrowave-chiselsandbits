@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "mod.chiselsandbits.mixin",
+  "package": "",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [

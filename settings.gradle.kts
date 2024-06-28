@@ -10,5 +10,7 @@ pluginManagement {
 rootProject.name = "retrowave"
 
 include("common")
+
 include("fabric")
+
 include("neoforge")

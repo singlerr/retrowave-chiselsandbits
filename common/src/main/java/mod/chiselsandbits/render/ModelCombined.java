@@ -1,70 +1,87 @@
 package mod.chiselsandbits.render;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.Random;
+import mod.chiselsandbits.client.model.baked.BaseBakedBlockModel;
 import mod.chiselsandbits.core.ClientSide;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
+import net.minecraftforge.client.model.data.IModelData;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ModelCombined extends BaseBakedBlockModel
-{
+public class ModelCombined extends BaseBakedBlockModel {
 
-	IBakedModel[] merged;
+    private static final Random COMBINED_RANDOM_MODEL = new Random();
 
-	List<BakedQuad>[] face;
-	List<BakedQuad> generic;
+    IBakedModel[] merged;
 
-	@SuppressWarnings( "unchecked" )
-	public ModelCombined(
-			final IBakedModel... args )
-	{
-		face = new ArrayList[EnumFacing.VALUES.length];
+    List<BakedQuad>[] face;
+    List<BakedQuad> generic;
 
-		generic = new ArrayList<BakedQuad>();
-		for ( final EnumFacing f : EnumFacing.VALUES )
-		{
-			face[f.ordinal()] = new ArrayList<BakedQuad>();
-		}
+    boolean isSideLit;
 
-		merged = args;
+    @SuppressWarnings("unchecked")
+    public ModelCombined(final IBakedModel... args) {
+        face = new ArrayList[Direction.values().length];
 
-		for ( final IBakedModel m : merged )
-		{
-			generic.addAll( m.getQuads( null, null, 0 ) );
-			for ( final EnumFacing f : EnumFacing.VALUES )
-			{
-				face[f.ordinal()].addAll( m.getQuads( null, f, 0 ) );
-			}
-		}
-	}
+        generic = new ArrayList<>();
+        for (final Direction f : Direction.values()) {
+            face[f.ordinal()] = new ArrayList<>();
+        }
 
-	@Override
-	public TextureAtlasSprite getParticleTexture()
-	{
-		for ( final IBakedModel a : merged )
-		{
-			return a.getParticleTexture();
-		}
+        merged = args;
 
-		return ClientSide.instance.getMissingIcon();
-	}
+        for (final IBakedModel m : merged) {
+            generic.addAll(m.getQuads(null, null, COMBINED_RANDOM_MODEL));
+            for (final Direction f : Direction.values()) {
+                face[f.ordinal()].addAll(m.getQuads(null, f, COMBINED_RANDOM_MODEL));
+            }
+        }
 
-	@Override
-	public List<BakedQuad> getQuads(
-			final IBlockState state,
-			final EnumFacing side,
-			final long rand )
-	{
-		if ( side != null )
-		{
-			return face[side.ordinal()];
-		}
+        isSideLit = Arrays.stream(args).anyMatch(IBakedModel::isSideLit);
+    }
 
-		return generic;
-	}
+    @Override
+    public TextureAtlasSprite getParticleTexture() {
+        for (final IBakedModel a : merged) {
+            return a.getParticleTexture();
+        }
 
+        return ClientSide.instance.getMissingIcon();
+    }
+
+    @NotNull
+    @Override
+    public List<BakedQuad> getQuads(
+            @Nullable final BlockState state,
+            @Nullable final Direction side,
+            @NotNull final Random rand,
+            @NotNull final IModelData extraData) {
+        if (side != null) {
+            return face[side.ordinal()];
+        }
+
+        return generic;
+    }
+
+    @Override
+    public List<BakedQuad> getQuads(
+            @Nullable final BlockState state, @Nullable final Direction side, final Random rand) {
+        if (side != null) {
+            return face[side.ordinal()];
+        }
+
+        return generic;
+    }
+
+    @Override
+    public boolean isSideLit() {
+        return isSideLit;
+    }
 }

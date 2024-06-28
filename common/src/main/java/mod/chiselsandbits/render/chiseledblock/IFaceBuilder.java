@@ -1,26 +1,19 @@
 package mod.chiselsandbits.render.chiseledblock;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
-public interface IFaceBuilder
-{
+public interface IFaceBuilder {
 
-	void setFace(
-			EnumFacing myFace,
-			int tintIndex );
+    void setFace(Direction myFace, int tintIndex);
 
-	void put(
-			int element,
-			float... args );
+    void put(int element, float... args);
 
-	void begin();
+    void begin();
 
-	BakedQuad create(
-			TextureAtlasSprite sprite );
+    BakedQuad create(TextureAtlasSprite sprite);
 
-	VertexFormat getFormat();
-
+    VertexFormat getFormat();
 }

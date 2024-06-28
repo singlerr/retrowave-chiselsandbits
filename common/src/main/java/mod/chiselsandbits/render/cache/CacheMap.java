@@ -8,239 +8,181 @@ import java.util.HashMap;
  * In the end i'm not sure if this helps vs WeakHashMap, but it is cleaner sync
  * wise...
  */
-public class CacheMap<K, V>
-{
+public class CacheMap<K, V> {
 
-	public static interface EqTest
-	{
+    public static interface EqTest {
 
-		boolean doTest(
-				Object a,
-				Object b );
+        boolean doTest(Object a, Object b);
 
-		int getHash(
-				Object referent );
+        int getHash(Object referent);
+    }
+    ;
 
-	};
+    private static class EqSimple implements EqTest {
 
-	private static class EqSimple implements EqTest
-	{
+        @Override
+        public boolean doTest(final Object a, final Object b) {
+            return a.equals(b);
+        }
 
-		@Override
-		public boolean doTest(
-				final Object a,
-				final Object b )
-		{
-			return a.equals( b );
-		}
+        @Override
+        public int getHash(final Object referent) {
+            return referent.hashCode();
+        }
+    }
+    ;
 
-		@Override
-		public int getHash(
-				final Object referent )
-		{
-			return referent.hashCode();
-		}
+    private final EqTest test;
 
-	};
+    private boolean eq(final Object a, final Object b) {
+        return test.doTest(a, b);
+    }
 
-	final private EqTest test;
+    private class WeakEntiry extends WeakReference<K> {
 
-	private boolean eq(
-			final Object a,
-			final Object b )
-	{
-		return test.doTest( a, b );
-	}
+        final int hashcode;
 
-	private class WeakEntiry extends WeakReference<K>
-	{
+        public WeakEntiry(final K referent, final ReferenceQueue<? super K> q) {
+            super(referent, q);
+            hashcode = test.getHash(referent);
+        }
 
-		final int hashcode;
+        @Override
+        public boolean equals(final Object obj) {
+            final K inner = get();
 
-		public WeakEntiry(
-				final K referent,
-				final ReferenceQueue<? super K> q )
-		{
-			super( referent, q );
-			hashcode = test.getHash( referent );
-		}
+            if (inner == null) {
+                return false;
+            }
 
-		@Override
-		public boolean equals(
-				final Object obj )
-		{
-			final K inner = get();
+            if (obj == this || inner == obj) {
+                return true;
+            }
 
-			if ( inner == null )
-			{
-				return false;
-			}
+            if (obj instanceof WeakReference) {
+                final Object o = ((WeakReference<?>) obj).get();
 
-			if ( obj == this || inner == obj )
-			{
-				return true;
-			}
+                if (o == null) {
+                    return false;
+                }
 
-			if ( obj instanceof WeakReference )
-			{
-				final Object o = ( (WeakReference<?>) obj ).get();
+                if (o == inner) {
+                    return true;
+                }
 
-				if ( o == null )
-				{
-					return false;
-				}
+                return eq(inner, o);
+            }
 
-				if ( o == inner )
-				{
-					return true;
-				}
+            return eq(inner, obj);
+        }
 
-				return eq( inner, o );
-			}
+        @Override
+        public int hashCode() {
+            return hashcode;
+        }
+    }
+    ;
 
-			return eq( inner, obj );
-		}
+    private final ReferenceQueue<K> queue = new ReferenceQueue<K>();
+    private final HashMap<Object, V> inner = new HashMap<Object, V>();
 
-		@Override
-		public int hashCode()
-		{
-			return hashcode;
-		}
+    public CacheMap() {
+        test = new EqSimple();
+        ModelCacheCleanup.registerCacheMap(this);
+    }
 
-	};
+    public CacheMap(final EqTest test) {
+        this.test = test;
+        ModelCacheCleanup.registerCacheMap(this);
+    }
 
-	private final ReferenceQueue<K> queue = new ReferenceQueue<K>();
-	private final HashMap<Object, V> inner = new HashMap<Object, V>();
+    @Override
+    protected void finalize() throws Throwable {
+        ModelCacheCleanup.unregisterCacheMap(this);
+    }
 
-	public CacheMap()
-	{
-		test = new EqSimple();
-		ModelCacheCleanup.registerCacheMap( this );
-	}
+    public void put(final K key, final V value) {
+        synchronized (this) {
+            inner.put(new WeakEntiry(key, queue), value);
+        }
+    }
 
-	public CacheMap(
-			final EqTest test )
-	{
-		this.test = test;
-		ModelCacheCleanup.registerCacheMap( this );
-	}
+    private class EqWrapper {
 
-	@Override
-	protected void finalize() throws Throwable
-	{
-		ModelCacheCleanup.unregisterCacheMap( this );
-	}
+        private int hashcode;
+        private K inner;
 
-	public void put(
-			final K key,
-			final V value )
-	{
-		synchronized ( this )
-		{
-			inner.put( new WeakEntiry( key, queue ), value );
-		}
-	}
+        @SuppressWarnings("unchecked")
+        void setObject(final K o) {
+            if (o instanceof WeakReference) {
+                inner = (K) ((WeakReference<?>) o).get();
+                hashcode = test.getHash(inner);
+            } else {
+                inner = o;
+                hashcode = test.getHash(inner);
+            }
+        }
 
-	private class EqWrapper
-	{
+        @Override
+        public int hashCode() {
+            return hashcode;
+        }
 
-		private int hashcode;
-		private K inner;
+        @Override
+        public boolean equals(final Object obj) {
+            if (inner == null) {
+                return false;
+            }
 
-		@SuppressWarnings( "unchecked" )
-		void setObject(
-				final K o )
-		{
-			if ( o instanceof WeakReference )
-			{
-				inner = (K) ( (WeakReference<?>) o ).get();
-				hashcode = test.getHash( inner );
-			}
-			else
-			{
-				inner = o;
-				hashcode = test.getHash( inner );
-			}
-		}
+            if (obj == this || inner == obj) {
+                return true;
+            }
 
-		@Override
-		public int hashCode()
-		{
-			return hashcode;
-		}
+            if (obj instanceof WeakReference) {
+                final Object o = ((WeakReference<?>) obj).get();
 
-		@Override
-		public boolean equals(
-				final Object obj )
-		{
-			if ( inner == null )
-			{
-				return false;
-			}
+                if (o == null) {
+                    return false;
+                }
 
-			if ( obj == this || inner == obj )
-			{
-				return true;
-			}
+                if (o == inner) {
+                    return true;
+                }
 
-			if ( obj instanceof WeakReference )
-			{
-				final Object o = ( (WeakReference<?>) obj ).get();
+                return eq(inner, o);
+            }
 
-				if ( o == null )
-				{
-					return false;
-				}
+            return eq(inner, obj);
+        }
+    }
+    ;
 
-				if ( o == inner )
-				{
-					return true;
-				}
+    private final EqWrapper lookupHelper = new EqWrapper();
 
-				return eq( inner, o );
-			}
+    public V get(final K key) {
+        synchronized (this) {
+            lookupHelper.setObject(key);
+            return inner.get(lookupHelper);
+        }
+    }
 
-			return eq( inner, obj );
-		}
+    public void clear() {
+        synchronized (this) {
+            inner.clear();
 
-	};
+            while (queue.poll() != null) {
+                // we don't care...
+            }
+        }
+    }
 
-	private final EqWrapper lookupHelper = new EqWrapper();
+    protected void cleanup() {
+        Object ref;
 
-	public V get(
-			final K key )
-	{
-		synchronized ( this )
-		{
-			lookupHelper.setObject( key );
-			return inner.get( lookupHelper );
-		}
-	}
-
-	public void clear()
-	{
-		synchronized ( this )
-		{
-			inner.clear();
-
-			while ( queue.poll() != null )
-			{
-				// we don't care...
-			}
-		}
-	}
-
-	protected void cleanup()
-	{
-		Object ref;
-
-		while ( ( ref = queue.poll() ) != null )
-		{
-			synchronized ( this )
-			{
-				inner.remove( ref );
-			}
-		}
-	}
-
+        while ((ref = queue.poll()) != null) {
+            synchronized (this) {
+                inner.remove(ref);
+            }
+        }
+    }
 }

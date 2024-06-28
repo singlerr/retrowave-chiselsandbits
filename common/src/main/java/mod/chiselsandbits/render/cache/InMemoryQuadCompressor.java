@@ -3,201 +3,157 @@ package mod.chiselsandbits.render.cache;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import mod.chiselsandbits.core.Log;
 import mod.chiselsandbits.render.cache.CacheMap.EqTest;
 
-public class InMemoryQuadCompressor implements Runnable
-{
+public class InMemoryQuadCompressor implements Runnable {
 
-	protected static final float EPSILON = 0.0001f;
+    protected static final float EPSILON = 0.0001f;
 
-	private static CacheMap<float[][], WeakReference<float[][]>> cachelvl2 = new CacheMap<float[][], WeakReference<float[][]>>( new EqTest() {
+    private static CacheMap<float[][], WeakReference<float[][]>> cachelvl2 =
+            new CacheMap<float[][], WeakReference<float[][]>>(new EqTest() {
 
-		@Override
-		public boolean doTest(
-				final Object a,
-				final Object b )
-		{
-			final float[][] aa = (float[][]) a;
-			final float[][] bb = (float[][]) b;
+                @Override
+                public boolean doTest(final Object a, final Object b) {
+                    final float[][] aa = (float[][]) a;
+                    final float[][] bb = (float[][]) b;
 
-			if ( aa.length != bb.length )
-			{
-				return false;
-			}
+                    if (aa.length != bb.length) {
+                        return false;
+                    }
 
-			for ( int x = 0; x < aa.length; x++ )
-			{
-				if ( aa[x] != bb[x] )
-				{
-					return false;
-				}
-			}
+                    for (int x = 0; x < aa.length; x++) {
+                        if (aa[x] != bb[x]) {
+                            return false;
+                        }
+                    }
 
-			return true;
-		}
+                    return true;
+                }
 
-		@Override
-		public int getHash(
-				final Object referent )
-		{
-			final float[][] a = (float[][]) referent;
-			int out = 0;
+                @Override
+                public int getHash(final Object referent) {
+                    final float[][] a = (float[][]) referent;
+                    int out = 0;
 
-			for ( int x = 0; x < a.length; x++ )
-			{
-				out ^= System.identityHashCode( a[x] ) << x;
-			}
+                    for (int x = 0; x < a.length; x++) {
+                        out ^= System.identityHashCode(a[x]) << x;
+                    }
 
-			return out;
-		}
+                    return out;
+                }
+            });
 
-	} );
+    private static CacheMap<float[], WeakReference<float[]>> cache =
+            new CacheMap<float[], WeakReference<float[]>>(new EqTest() {
 
-	private static CacheMap<float[], WeakReference<float[]>> cache = new CacheMap<float[], WeakReference<float[]>>( new EqTest() {
+                @Override
+                public boolean doTest(final Object a, final Object b) {
+                    final float[] aa = (float[]) a;
+                    final float[] bb = (float[]) b;
 
-		@Override
-		public boolean doTest(
-				final Object a,
-				final Object b )
-		{
-			final float[] aa = (float[]) a;
-			final float[] bb = (float[]) b;
+                    if (aa.length != bb.length) {
+                        return false;
+                    }
 
-			if ( aa.length != bb.length )
-			{
-				return false;
-			}
+                    for (int x = 0; x < aa.length; x++) {
+                        if (Math.abs(aa[x] - bb[x]) > EPSILON) {
+                            return false;
+                        }
+                    }
 
-			for ( int x = 0; x < aa.length; x++ )
-			{
-				if ( Math.abs( aa[x] - bb[x] ) > EPSILON )
-				{
-					return false;
-				}
-			}
+                    return true;
+                }
 
-			return true;
-		}
+                @Override
+                public int getHash(final Object referent) {
+                    final float[] a = (float[]) referent;
+                    int out = 0;
 
-		@Override
-		public int getHash(
-				final Object referent )
-		{
-			final float[] a = (float[]) referent;
-			int out = 0;
+                    for (int x = 0; x < a.length; x++) {
+                        out ^= (int) (a[x] * 100) << x;
+                    }
 
-			for ( int x = 0; x < a.length; x++ )
-			{
-				out ^= (int) ( a[x] * 100 ) << x;
-			}
+                    return out;
+                }
+            });
 
-			return out;
-		}
+    BlockingQueue<WeakReference<float[][][]>> submissions = new LinkedBlockingQueue<WeakReference<float[][][]>>();
 
-	} );
+    float[] junk;
 
-	BlockingQueue<WeakReference<float[][][]>> submissions = new LinkedBlockingQueue<WeakReference<float[][][]>>();
+    private float[] combineLevel1(final float[] fs) {
+        final WeakReference<float[]> o = cache.get(fs);
 
-	float[] junk;
+        if (o != null) {
+            final float[] f = o.get();
+            if (f != null) {
+                return f;
+            }
+        }
 
-	private float[] combineLevel1(
-			final float[] fs )
-	{
-		final WeakReference<float[]> o = cache.get( fs );
+        cache.put(fs, new WeakReference<float[]>(fs));
+        return fs;
+    }
 
-		if ( o != null )
-		{
-			final float[] f = o.get();
-			if ( f != null )
-			{
-				return f;
-			}
-		}
+    private float[][] combineLevel2(final float[][] fs) {
+        final WeakReference<float[][]> o = cachelvl2.get(fs);
 
-		cache.put( fs, new WeakReference<float[]>( fs ) );
-		return fs;
-	}
+        if (o != null) {
+            final float[][] f = o.get();
+            if (f != null) {
+                return f;
+            }
+        }
 
-	private float[][] combineLevel2(
-			final float[][] fs )
-	{
-		final WeakReference<float[][]> o = cachelvl2.get( fs );
+        cachelvl2.put(fs, new WeakReference<float[][]>(fs));
+        return fs;
+    }
 
-		if ( o != null )
-		{
-			final float[][] f = o.get();
-			if ( f != null )
-			{
-				return f;
-			}
-		}
+    public InMemoryQuadCompressor() {
+        final Thread t = new Thread(this);
+        t.setName("C&B In Memory Compression");
+        t.setPriority(Thread.MIN_PRIORITY);
+        t.start();
+    }
 
-		cachelvl2.put( fs, new WeakReference<float[][]>( fs ) );
-		return fs;
-	}
+    public float[][][] compress(final float[][][] unpackedData) {
+        try {
+            submissions.put(new WeakReference<float[][][]>(unpackedData));
+        } catch (final InterruptedException e) {
+            // If it fails to inject it into the list its not the end of the
+            // world, just continue.
+        }
 
-	public InMemoryQuadCompressor()
-	{
-		final Thread t = new Thread( this );
-		t.setName( "C&B In Memory Compression" );
-		t.setPriority( Thread.MIN_PRIORITY );
-		t.start();
-	}
+        return unpackedData;
+    }
 
-	public float[][][] compress(
-			final float[][][] unpackedData )
-	{
-		try
-		{
-			submissions.put( new WeakReference<float[][][]>( unpackedData ) );
-		}
-		catch ( final InterruptedException e )
-		{
-			// If it fails to inject it into the list its not the end of the
-			// world, just continue.
-		}
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                final WeakReference<float[][][]> l = submissions.take();
 
-		return unpackedData;
-	}
+                if (l == null) {
+                    break;
+                }
 
-	@Override
-	public void run()
-	{
-		while ( true )
-		{
-			try
-			{
-				final WeakReference<float[][][]> l = submissions.take();
+                final float[][][] active = l.get();
 
-				if ( l == null )
-				{
-					break;
-				}
+                if (active == null) {
+                    continue;
+                }
 
-				final float[][][] active = l.get();
+                for (int x = 0; x < active.length; x++) {
+                    for (int y = 0; y < active[x].length; y++) {
+                        active[x][y] = combineLevel1(active[x][y]);
+                    }
 
-				if ( active == null )
-				{
-					continue;
-				}
-
-				for ( int x = 0; x < active.length; x++ )
-				{
-					for ( int y = 0; y < active[x].length; y++ )
-					{
-						active[x][y] = combineLevel1( active[x][y] );
-					}
-
-					active[x] = combineLevel2( active[x] );
-				}
-			}
-			catch ( final InterruptedException e )
-			{
-				Log.logError( "Error in compresssor", e );
-			}
-		}
-	}
-
+                    active[x] = combineLevel2(active[x]);
+                }
+            } catch (final InterruptedException e) {
+                Log.logError("Error in compresssor", e);
+            }
+        }
+    }
 }

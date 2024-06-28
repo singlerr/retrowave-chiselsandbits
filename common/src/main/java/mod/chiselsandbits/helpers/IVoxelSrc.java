@@ -1,11 +1,6 @@
 package mod.chiselsandbits.helpers;
 
-public interface IVoxelSrc
-{
+public interface IVoxelSrc {
 
-	int getSafe(
-			int x,
-			int y,
-			int i );
-
+    int getSafe(int x, int y, int i);
 }

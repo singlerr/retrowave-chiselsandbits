@@ -1,31 +1,34 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-plugins {
-    id("com.github.johnrengelman.shadow")
-}
+plugins { id("com.github.johnrengelman.shadow") }
 
-val fabric_loader_version:String by project
-val fabric_api_version:String by project
-val architectury_api_version:String by project
+val fabric_loader_version: String by project
+val fabric_api_version: String by project
+val architectury_api_version: String by project
+val cloth_config_api_version: String by rootProject
 
 architectury {
     platformSetupLoomIde()
     fabric()
 }
 
+loom { accessWidenerPath.set(project(":common").loom.accessWidenerPath) }
+
 configurations {
-    val common = create("common") {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
+    val common =
+        create("common") {
+            isCanBeResolved = true
+            isCanBeConsumed = false
+        }
     compileClasspath.get().extendsFrom(common)
     runtimeClasspath.get().extendsFrom(common)
     getByName("developmentFabric").extendsFrom(common)
 
-    val shadowBundle = create("shadowBundle") {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
+    val shadowBundle =
+        create("shadowBundle") {
+            isCanBeResolved = true
+            isCanBeConsumed = false
+        }
 }
 
 dependencies {
@@ -34,14 +37,13 @@ dependencies {
     modImplementation("dev.architectury:architectury-fabric:$architectury_api_version")
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowBundle"(project(":common", "transformProductionFabric"))
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_api_version}")
 }
 
 tasks.withType<ProcessResources> {
     inputs.property("version", project.version)
 
-    filesMatching("fabric.mod.json") {
-        expand("version" to project.version)
-    }
+    filesMatching("fabric.mod.json") { expand("version" to project.version) }
 }
 
 tasks.withType<ShadowJar> {
@@ -49,6 +51,4 @@ tasks.withType<ShadowJar> {
     archiveClassifier.set("dev-shadow")
 }
 
-tasks.remapJar {
-    input.set(tasks.getByName<ShadowJar>("shadowJar").archiveFile)
-}
+tasks.remapJar { input.set(tasks.getByName<ShadowJar>("shadowJar").archiveFile) }

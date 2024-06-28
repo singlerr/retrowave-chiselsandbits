@@ -10,16 +10,13 @@ package mod.chiselsandbits.api;
  * have the @ChiselsAndBitsAddon annotation, failure to do these steps will
  * result in an error.
  */
-public interface IChiselsAndBitsAddon
-{
+public interface IChiselsAndBitsAddon {
 
-	/**
-	 * Called during init-phase for C&B.
-	 *
-	 * @param api
-	 *            C&B Api Object
-	 */
-	void onReadyChiselsAndBits(
-			final IChiselAndBitsAPI api );
-
+    /**
+     * Called during init-phase for C&B.
+     *
+     * @param api
+     *            C&B Api Object
+     */
+    void onReadyChiselsAndBits(final IChiselAndBitsAPI api);
 }
