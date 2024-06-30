@@ -1,5 +1,6 @@
 package mod.chiselsandbits.api;
 
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import mod.chiselsandbits.api.APIExceptions.CannotBeChiseled;
 import mod.chiselsandbits.api.APIExceptions.InvalidBitItem;
@@ -13,8 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 
 /**
  * Do not implement, is passed to your {@link IChiselsAndBitsAddon}
@@ -132,11 +133,11 @@ public interface IChiselAndBitsAPI {
      *            where to spawn bits, should be in the block near where they
      *            are being extracted from.
      */
-    void giveBitToPlayer(Player player, ItemStack stack, Vector3d spawnPos);
+    void giveBitToPlayer(Player player, ItemStack stack, Vec3 spawnPos);
 
     /**
      * Access the contents of a bitbag as if it was a normal
-     * with a few extra features.
+     * {@link IItemHandler} with a few extra features.
      *
      * @return internal object to manipulate bag.
      */
@@ -179,16 +180,6 @@ public interface IChiselAndBitsAPI {
      */
     void endUndoGroup(Player player);
 
-    /**
-     * Register a custom material as equivalent to another material.
-     *
-     * @param newMaterial
-     *            your custom material
-     * @param target
-     *            default MC Material C&B knows about.
-     */
-    void addEquivilantMaterial(String newMaterial, String target); // this should be a material C&B understands,
-    // other wise you'll get stone anyway.
 
     /**
      * Get a C&B key binding.

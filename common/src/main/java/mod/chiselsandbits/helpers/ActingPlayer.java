@@ -1,7 +1,7 @@
 package mod.chiselsandbits.helpers;
 
 import javax.annotation.Nonnull;
-import mod.chiselsandbits.api.EventBlockBitModification;
+import mod.chiselsandbits.api.BlockBitModification;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -61,8 +61,8 @@ public class ActingPlayer {
 
             if (innerPlayer.canPlayerEdit(pos, side, is)
                     && innerPlayer.getEntityWorld().isBlockModifiable(innerPlayer, pos)) {
-                final EventBlockBitModification event = new EventBlockBitModification(
-                        innerPlayer.getEntityWorld(), pos, innerPlayer, hand, is, placement);
+                final BlockBitModification event =
+                        new BlockBitModification(innerPlayer.getEntityWorld(), pos, innerPlayer, hand, is, placement);
                 permissionResult = !MinecraftForge.EVENT_BUS.post(event);
             } else {
                 permissionResult = false;

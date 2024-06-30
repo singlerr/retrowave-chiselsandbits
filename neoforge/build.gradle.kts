@@ -4,7 +4,7 @@ plugins { id("com.github.johnrengelman.shadow") }
 
 val neoforge_version: String by project
 val architectury_api_version: String by project
-val cloth_config_api_version: String by rootProject
+val forge_config_api_port_version: String by rootProject
 
 architectury {
     platformSetupLoomIde()
@@ -41,7 +41,7 @@ dependencies {
     modImplementation("dev.architectury:architectury-neoforge:$architectury_api_version")
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowBundle"(project(":common", "transformProductionNeoForge"))
-    modApi("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_api_version}")
+    api("fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:$forge_config_api_port_version")
 }
 
 tasks.withType<ProcessResources> {

@@ -20,6 +20,9 @@
     ],
     "client": [
       "io.github.singlerr.retrowave.fabric.client.ExampleModFabricClient"
+    ],
+    "server": [
+      "io.github.singlerr.retrowave.fabric.server.ChiselsAndBitsFabricServer"
     ]
   },
   "mixins": [

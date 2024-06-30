@@ -56,8 +56,14 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven { url = uri("https://maven.shedaniel.me/") }
-        maven { url = uri("https://maven.terraformersmc.com/releases/") }
+        maven {
+            name = "Fuzs Mod Resources"
+            url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/")
+        }
+        maven {
+            name = "Terraformers"
+            url = uri("https://maven.terraformersmc.com/")
+        }
     }
 
     dependencies {

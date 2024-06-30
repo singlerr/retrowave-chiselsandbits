@@ -345,6 +345,9 @@
   "mod.chiselsandbits.config.client.performance.vertexformats.custom.comment": "Custom vertex formats related client performance configuration.",
   "mod.chiselsandbits.config.client.performance.vertexformats.custom.disabled": "Performance: Custom formats disabled",
   "mod.chiselsandbits.config.client.performance.vertexformats.custom.disabled.comment": "When enabled this prevents custom vertex formats from working.",
+  "mod.chiselsandbits.config.client.performance.models.cache-size": "Model cache size",
+  "mod.chiselsandbits.config.client.performance.models.cache-size.comment": "Model cache size",
+
   "mod.chiselsandbits.config.client.settings.chat-mode-notification": "Notification mode: Chat",
   "mod.chiselsandbits.config.client.settings.chat-mode-notification.comment": "When enabled notifies you of changes to for example tool modes in the chat.",
   "mod.chiselsandbits.config.client.settings.clipboard.add-broken-blocks": "Clipboard: Store broken chiseled blocks",
@@ -371,6 +374,7 @@
   "mod.chiselsandbits.config.common.help.enabled.comment": "Indicates if help tooltips are enabled or not.",
   "mod.chiselsandbits.config.common.performance.collisions.cache.size": "Collisions-cache: Size",
   "mod.chiselsandbits.config.common.performance.collisions.cache.size.comment": "The size of the collisions cache used to store VoxelShapes that determine collisions and hit positions. Higher value increases performance but also increases memory usage.",
+  "mod.chiselsandbits.config.server.troubleshooting": "Trouble Shooting",
   "mod.chiselsandbits.config.server.balancing.bag-space.required": "Bit-Operations: Require space",
   "mod.chiselsandbits.config.server.balancing.bag-space.required.comment": "When enabled does not perform bit operations on blocks when there is no space in bags or the players inventory to store the results.",
   "mod.chiselsandbits.config.server.balancing.bag-space.void-excess": "Bit-Operations: Void excess",

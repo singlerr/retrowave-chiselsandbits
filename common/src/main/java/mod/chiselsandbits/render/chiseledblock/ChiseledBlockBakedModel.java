@@ -10,8 +10,6 @@ import mod.chiselsandbits.core.ClientSide;
 import mod.chiselsandbits.helpers.ModUtil;
 import mod.chiselsandbits.render.helpers.ModelQuadLayer;
 import mod.chiselsandbits.render.helpers.ModelUtil;
-import mod.flatcoloredblocks.block.BlockFlatColoredTranslucent;
-import mod.flatcoloredblocks.block.ConversionHSV2RGB;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.*;
@@ -25,7 +23,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.pipeline.LightUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -241,7 +238,7 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
                 offsetVec(from, region.getMinX(), region.getMinY(), region.getMinZ(), myFace, -1);
                 final ModelQuadLayer[] mpc =
                         ModelUtil.getCachedFace(region.blockStateID, weight, myFace, myLayer.layer);
-                BlockState state = ModUtil.getStateById(region.blockStateID);
+
                 if (mpc != null) {
                     for (final ModelQuadLayer pc : mpc) {
                         final IFaceBuilder faceBuilder = pc.light > 0 ? litBuilder : darkBuilder;
@@ -260,7 +257,6 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
                                     elementIndex++) {
                                 final VertexFormatElement element =
                                         builderFormat.getElements().get(elementIndex);
-
                                 switch (element.getUsage()) {
                                     case POSITION:
                                         getVertexPos(pos, myFace, vertNum, to, from);
@@ -269,38 +265,12 @@ public class ChiseledBlockBakedModel extends BaseBakedBlockModel {
 
                                     case COLOR:
                                         final int cb = pc.color;
-                                        float[] color = new float[] {
-                                            byteToFloat(cb >> 16),
-                                            byteToFloat(cb >> 8),
-                                            byteToFloat(cb),
-                                            NotZero(byteToFloat(cb >> 24))
-                                        };
-                                        if (BlockDiscriminator.isTransparent(state.getBlock())) {
-                                            color[3] = 0.7f;
-
-                                            if (state.getBlock() instanceof BlockFlatColoredTranslucent) {
-                                                BlockFlatColoredTranslucent coloredBlock =
-                                                        (BlockFlatColoredTranslucent) state.getBlock();
-                                                int hsv = coloredBlock.hsvFromState(state);
-                                                int rgb = ConversionHSV2RGB.toRGB(hsv);
-                                                // r g b a (0xff 0xff 0xff 0xff)
-                                                int r = rgb >> 16 & 255;
-                                                int g = rgb >> 8 & 255;
-                                                int b = rgb & 255;
-                                                float light = LightUtil.diffuseLight(myFace);
-                                                color[0] = r / 255f * light;
-                                                color[1] = g / 255f * light;
-                                                color[2] = b / 255f * light;
-                                                color[3] = 0.5f;
-                                            }
-                                        }
-                                        if (BlockDiscriminator.isLightSource(state.getBlock())) {
-                                            color[0] = 1f;
-                                            color[1] = 1;
-                                            color[2] = 1;
-                                            color[3] = 0.95f;
-                                        }
-                                        faceBuilder.put(elementIndex, color);
+                                        faceBuilder.put(
+                                                elementIndex,
+                                                byteToFloat(cb >> 16),
+                                                byteToFloat(cb >> 8),
+                                                byteToFloat(cb),
+                                                NotZero(byteToFloat(cb >> 24)));
                                         break;
 
                                     case NORMAL:

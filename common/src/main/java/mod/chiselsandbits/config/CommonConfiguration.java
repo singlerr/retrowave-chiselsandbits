@@ -1,39 +1,46 @@
 package mod.chiselsandbits.config;
 
-import lombok.Getter;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import mod.chiselsandbits.config.utils.ConfigEntryHolder;
+import java.util.List;
+import mod.chiselsandbits.helpers.LocalStrings;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.common.ForgeConfigSpec;
 
-@Getter
 public class CommonConfiguration extends AbstractConfiguration {
 
-    private final ConfigEntryHolder<Boolean> enableHelp;
-    private final ConfigEntryHolder<Long> collisionBoxCacheSize;
+    public ForgeConfigSpec.BooleanValue enableHelp;
+    public ForgeConfigSpec.LongValue collisionBoxCacheSize;
 
-    protected CommonConfiguration(Component title) {
-        super(title);
+    public CommonConfiguration(ForgeConfigSpec.Builder builder) {
+        createCategory(builder, "common.help");
 
-        this.enableHelp = new ConfigEntryHolder<>(true);
-        this.collisionBoxCacheSize = new ConfigEntryHolder<>(10000L);
+        enableHelp = defineBoolean(builder, "common.help.enabled", true);
 
-        ConfigCategory helpCategory = createCategory(Component.translatable("mod.chiselsandbits.config.common.help"));
-        helpCategory.addEntry(getEntryBuilder()
-                .startBooleanToggle(
-                        Component.translatable("mod.chiselsandbits.config.common.help.enabled"), enableHelp.getValue())
-                .setTooltip(Component.translatable("mod.chiselsandbits.config.common.help.enabled.comment"))
-                .setSaveConsumer(enableHelp)
-                .build());
+        finishCategory(builder);
 
-        ConfigCategory performanceCategory =
-                createCategory(Component.translatable("mod.chiselsandbits.config.common.performance"));
-        performanceCategory.addEntry(getEntryBuilder()
-                .startLongField(
-                        Component.translatable("mod.chiselsandbits.config.common.performance.collisions.cache.size"),
-                        collisionBoxCacheSize.getValue())
-                .setTooltip(Component.translatable(
-                        "mod.chiselsandbits.config.common.performance.collisions.cache.size.comment"))
-                .setSaveConsumer(collisionBoxCacheSize)
-                .build());
+        createCategory(builder, "common.performance");
+
+        collisionBoxCacheSize = defineLong(builder, "common.performance.collisions.cache.size", 10000L);
+
+        finishCategory(builder);
+    }
+
+    public void helpText(final LocalStrings string, final List<Component> tooltip, final String... variables) {
+        if (enableHelp.get()) {
+            int varOffset = 0;
+
+            final String[] lines = string.getLocal().split(";");
+            for (String a : lines) {
+                while (a.contains("{}") && variables.length > varOffset) {
+                    final int offset = a.indexOf("{}");
+                    if (offset >= 0) {
+                        final String pre = a.substring(0, offset);
+                        final String post = a.substring(offset + 2);
+                        a = String.format("%s%s%s", pre, variables[varOffset++], post);
+                    }
+                }
+
+                tooltip.add(Component.literal(a));
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ plugins { id("com.github.johnrengelman.shadow") }
 val fabric_loader_version: String by project
 val fabric_api_version: String by project
 val architectury_api_version: String by project
-val cloth_config_api_version: String by rootProject
+val forge_config_api_port_version: String by rootProject
 
 architectury {
     platformSetupLoomIde()
@@ -37,7 +37,7 @@ dependencies {
     modImplementation("dev.architectury:architectury-fabric:$architectury_api_version")
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowBundle"(project(":common", "transformProductionFabric"))
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_api_version}")
+    modApi("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$forge_config_api_port_version")
 }
 
 tasks.withType<ProcessResources> {

@@ -22,7 +22,7 @@ public interface ParameterType<T extends Object> {
         /* enableBitLightSource */ );
 
         @Override
-        public ParamTypes getType() {
+        public mod.chiselsandbits.api.ParameterType.ParamTypes getType() {
             return ParamTypes.BOOLEAN;
         }
     };
@@ -31,7 +31,7 @@ public interface ParameterType<T extends Object> {
         BLOCK_FULL_LIGHT_PERCENTAGE(/* bitLightPercentage */ );
 
         @Override
-        public ParamTypes getType() {
+        public mod.chiselsandbits.api.ParameterType.ParamTypes getType() {
             return ParamTypes.FLOAT;
         }
     }
@@ -40,7 +40,7 @@ public interface ParameterType<T extends Object> {
         BIT_MAX_DRAWN_REGION_SIZE(/* maxDrawnRegionSize */ );
 
         @Override
-        public ParamTypes getType() {
+        public mod.chiselsandbits.api.ParameterType.ParamTypes getType() {
             return ParamTypes.DOUBLE;
         }
     }
@@ -49,7 +49,7 @@ public interface ParameterType<T extends Object> {
         BIT_BAG_MAX_STACK_SIZE(/* bagStackSize */ );
 
         @Override
-        public ParamTypes getType() {
+        public mod.chiselsandbits.api.ParameterType.ParamTypes getType() {
             return ParamTypes.INTEGER;
         }
     }
